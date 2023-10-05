@@ -62,7 +62,7 @@ public class AccountsController {
 	// This method is defined for transferring the amount between accountIds
 
 	@PostMapping(path = "/transferAmount", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> amountTransfer(@RequestBody @Valid AmountTransferPojo amountTransfer) {
+	public synchronized ResponseEntity<Object> amountTransfer(@RequestBody @Valid AmountTransferPojo amountTransfer) {
 		try {
 
 			this.accountsService.amountTransfer(amountTransfer.getAccountFrom(), amountTransfer.getAccountTo(),
