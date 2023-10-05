@@ -16,18 +16,6 @@ public class Account {
 
 	private final String accountId;
 
-	public BigDecimal getBalance() {
-		return balance;
-	}
-
-	public void setBalance(BigDecimal balance) {
-		this.balance = balance;
-	}
-
-	public String getAccountId() {
-		return accountId;
-	}
-
 	@NotNull
 	@Min(value = 0, message = "Initial balance must be positive.")
 	private BigDecimal balance;

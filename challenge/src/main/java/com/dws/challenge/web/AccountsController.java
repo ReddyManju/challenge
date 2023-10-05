@@ -1,5 +1,7 @@
 package com.dws.challenge.web;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,6 @@ import com.dws.challenge.exception.DuplicateAccountIdException;
 import com.dws.challenge.exception.NotSufficientBalanceException;
 import com.dws.challenge.exception.TransferSameAccountException;
 import com.dws.challenge.service.AccountsService;
-import com.dws.challenge.service.EmailNotificationService;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AccountsController {
 
-	Logger log = LoggerFactory.getLogger(EmailNotificationService.class);
+	Logger log = LoggerFactory.getLogger(AccountsController.class);
 
 	private final AccountsService accountsService;
 
@@ -43,7 +44,7 @@ public class AccountsController {
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> createAccount(@RequestBody @Valid Account account) {
 		log.info("Creating account {}", account);
-
+		
 		try {
 			this.accountsService.createAccount(account);
 		} catch (DuplicateAccountIdException daie) {
