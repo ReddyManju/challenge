@@ -11,7 +11,6 @@ import com.dws.challenge.exception.AmountTransferPojoException;
 import com.dws.challenge.exception.NotSufficientBalanceException;
 import com.dws.challenge.exception.TransferSameAccountException;
 import com.dws.challenge.repository.AccountsRepository;
-import com.dws.challenge.transaction.AccountTransactionManager;
 
 import lombok.Data;
 
@@ -19,41 +18,9 @@ import lombok.Data;
 @Data
 public class AccountsService {
 
-	
 	private final AccountsRepository accountsRepository;
-	
-	private final Object lock=new Object();
 
-	public AccountTransactionManager getTransactionManager() {
-		return transactionManager;
-	}
-
-	public void setTransactionManager(AccountTransactionManager transactionManager) {
-		this.transactionManager = transactionManager;
-	}
-
-	public NotificationService getNotificationService() {
-		return notificationService;
-	}
-
-	public void setNotificationService(NotificationService notificationService) {
-		this.notificationService = notificationService;
-	}
-
-	public TransferValidator getTransferValidator() {
-		return transferValidator;
-	}
-
-	public void setTransferValidator(TransferValidator transferValidator) {
-		this.transferValidator = transferValidator;
-	}
-
-	/*
-	 * public AccountsRepository getAccountsRepository() { return
-	 * accountsRepository; }
-	 */
-
-	private AccountTransactionManager transactionManager;
+	private final Object lock = new Object();
 
 	@Autowired
 	private NotificationService notificationService;
@@ -64,7 +31,7 @@ public class AccountsService {
 	@Autowired
 	public AccountsService(AccountsRepository accountsRepository) {
 		this.accountsRepository = accountsRepository;
-		this.transactionManager = new AccountTransactionManager(accountsRepository);
+
 	}
 
 	public void createAccount(Account account) {
@@ -80,20 +47,15 @@ public class AccountsService {
 			NotSufficientBalanceException {
 
 		// Validating the accounts Ids and balance amount
-		
-		 synchronized(lock) {
-		 
 
-		transferValidator.validate(getAccount(fromAccount), getAccount(toAccount), transferAmount);
-		transactionManager.doInTransaction(() -> {
+		synchronized (lock) {
+
+			transferValidator.validate(getAccount(fromAccount), getAccount(toAccount), transferAmount);
 
 			this.debit(fromAccount, transferAmount);
 			this.credit(toAccount, transferAmount);
-		});
-		
 
-		transactionManager.commit();
-		 } 
+		}
 
 		notificationService.notifyAboutTransfer(getAccount(fromAccount), "The transfer to the account with ID "
 				+ toAccount + " is now complete for the amount of " + transferAmount + ".");
@@ -102,14 +64,14 @@ public class AccountsService {
 	}
 
 	// This method is meant for Debit the amount from Source Account
-	private  Account debit(String accountId, BigDecimal amount) throws AmountTransferPojoException {
-		//added for Testing
+	private Account debit(String accountId, BigDecimal amount) throws AmountTransferPojoException {
+		// added for Testing
 		/*
 		 * try { Thread.sleep(5000); } catch (InterruptedException e) { // TODO
 		 * Auto-generated catch block e.printStackTrace(); }
 		 */
 
-		final Account account = transactionManager.getRepoProxy().getAccount(accountId);
+		final Account account = accountsRepository.getAccount(accountId);
 		if (account == null) {
 			throw new AmountTransferPojoException("Account does not exist");
 		}
@@ -122,13 +84,13 @@ public class AccountsService {
 	}
 
 	// This method is meant for Credit the amount from Destination Account
-	private  Account  credit(String accountId, BigDecimal amount) throws AmountTransferPojoException {
-		
+	private Account credit(String accountId, BigDecimal amount) throws AmountTransferPojoException {
+
 		/*
 		 * try { Thread.sleep(5000); } catch (InterruptedException e) { // TODO
 		 * Auto-generated catch block e.printStackTrace(); }
 		 */
-		final Account account = transactionManager.getRepoProxy().getAccount(accountId);
+		final Account account = accountsRepository.getAccount(accountId);
 		if (account == null) {
 			throw new AmountTransferPojoException("Account does not exist");
 		}
